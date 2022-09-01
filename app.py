@@ -60,6 +60,12 @@ def forge():
         db.session.add(movie)
     db.session.commit()
     click.echo('Done')
+
+@app.context_processor  #模板上下文处理函数,统一注入到每一个模板的上下文环境中，因此可以直接在模板中使用。
+def inject_user():  # 函数名可以随意修改
+    user = User.query.first()
+    return dict(user=user)  # 需要返回字典，等同于 return {'user': user}
+
 @app.route('/')  #一个视图函数可以绑定多个URL,通过附加多个装饰器来实现
 @app.route('/index')
 @app.route('/home')
@@ -68,11 +74,16 @@ def forge():
 def index():
     user = User.query.first()
     movies = Movie.query.all()
-    return render_template('index.html', user=user, movies=movies)
+    return render_template('indexNEW.html',  movies=movies)
 @app.route('/user/<name>')  #可以在URL中定义变量部分，下面的函数会处理所有/user/name的请求
 def user_page(name):
     return 'User page'
 @app.route('/user/<name>')  #可以返回用户名字，使用markupsafe避免恶意代码
 def user_page_name(name):
     return f'User: {escape(name)}'
+
+@app.errorhandler(404)  # 传入要处理的错误代码
+def page_not_found(e):  # 接受异常对象作为参数
+    user = User.query.first()
+    return render_template('404NEW.html'), 404  # 返回模板和状态码
 
